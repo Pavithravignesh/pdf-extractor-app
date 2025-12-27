@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![PDF Extractor Logo](https://img.shields.io/badge/PDF-Extractor-indigo?style=for-the-badge&logo=adobe-acrobat-reader&logoColor=white)
+![PDF Extractor Logo](./public/demo-screenshot1.png)
 
 **A modern, fast, and secure web application for extracting text from PDF documents**
 
