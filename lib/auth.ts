@@ -14,7 +14,7 @@ export const auth = betterAuth({
     baseURL: process.env.BETTER_AUTH_URL!, // 👈 CRITICAL for production
     trustedOrigins: [
         process.env.BETTER_AUTH_URL!,
-        "https://your-app.vercel.app", // 👈 Add your production domain
+        "https://pdf-extractor-app-rytp.vercel.app/", // 👈 Add your production domain
     ],
     database: prismaAdapter(prisma, {
         provider: "postgresql",
