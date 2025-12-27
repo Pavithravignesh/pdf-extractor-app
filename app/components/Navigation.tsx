@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FileText, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { signOut } from "@/lib/actions/auth-actions"; // Import your server action
+import { signOut } from "@/lib/actions/auth-actions";
 
 type Session = {
   user: {
@@ -83,7 +83,6 @@ export default function Navigation({ session }: { session: Session }) {
                   </Link>
                 </Button>
 
-                {/* Desktop Avatar with Dropdown */}
                 <div className="hidden md:block">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -128,7 +127,6 @@ export default function Navigation({ session }: { session: Session }) {
                   </DropdownMenu>
                 </div>
 
-                {/* Mobile Avatar with Dropdown */}
                 <div className="md:hidden">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
