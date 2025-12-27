@@ -4,7 +4,6 @@ import "./globals.css";
 import Navigation from "./components/Navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
