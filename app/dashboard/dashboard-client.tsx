@@ -192,8 +192,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+      {/* <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2 sm:gap-3">
             <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600" />
@@ -211,9 +210,8 @@ export default function DashboardPage() {
             </Button>
           </div>
         </div>
-      </header>
+      </header> */}
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Loading PDF.js Library */}
         {!pdfjsLoaded && !error && (
@@ -223,7 +221,6 @@ export default function DashboardPage() {
           </Alert>
         )}
 
-        {/* Error Display */}
         {error && (
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />
@@ -241,7 +238,6 @@ export default function DashboardPage() {
           </Alert>
         )}
 
-        {/* Upload Section */}
         {!pdfFile && (
           <Card className="max-w-2xl mx-auto">
             <CardHeader className="text-center pb-4">
@@ -283,10 +279,8 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        {/* PDF Viewer and Text Extractor */}
         {pdfFile && (
           <div className="space-y-4 sm:space-y-6">
-            {/* File Info Controls */}
             <Card>
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -329,7 +323,6 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Split View with Tabs */}
             <Tabs defaultValue="split" className="w-full">
               <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
                 <TabsTrigger value="split" className="text-xs sm:text-sm">Split View</TabsTrigger>
@@ -339,7 +332,6 @@ export default function DashboardPage() {
 
               <TabsContent value="split" className="space-y-4">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                  {/* PDF Preview */}
                   <Card className="overflow-hidden">
                     <CardHeader className="bg-slate-900 text-white py-3">
                       <CardTitle className="text-base">PDF Preview</CardTitle>
@@ -357,7 +349,6 @@ export default function DashboardPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Extracted Text */}
                   <Card className="overflow-hidden">
                     <CardHeader className="bg-slate-900 text-white py-3 flex flex-row justify-between items-center">
                       <CardTitle className="text-base">Extracted Text</CardTitle>
