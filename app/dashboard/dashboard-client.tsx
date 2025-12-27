@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { signOut } from "@/lib/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,16 +10,35 @@ import {
   FileText,
   Copy,
   Trash2,
-  LogOut,
   Loader2,
   AlertCircle,
   Check,
   RefreshCw
 } from "lucide-react";
 
+interface PDFItem {
+  str?: string;
+}
+
+interface PDFTextContent {
+  items: PDFItem[];
+}
+
 declare global {
   interface Window {
-    pdfjsLib: any;
+    pdfjsLib: {
+      GlobalWorkerOptions: {
+        workerSrc: string;
+      };
+      getDocument: (params: { data: Uint8Array; verbosity: number }) => {
+        promise: Promise<{
+          numPages: number;
+          getPage: (pageNum: number) => Promise<{
+            getTextContent: () => Promise<PDFTextContent>;
+          }>;
+        }>;
+      };
+    };
   }
 }
 
@@ -31,11 +48,9 @@ export default function DashboardPage() {
   const [extractedText, setExtractedText] = useState<string>("");
   const [isExtracting, setIsExtracting] = useState(false);
   const [error, setError] = useState<string>("");
-  const [pageCount, setPageCount] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [pdfjsLoaded, setPdfjsLoaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
 
   // Load PDF.js library from CDN
   useEffect(() => {
@@ -67,8 +82,8 @@ export default function DashboardPage() {
     return () => {
       try {
         document.body.removeChild(script);
-      } catch (e) {
-        //  already removed
+      } catch {
+        // Script already removed
       }
     };
   }, []);
@@ -118,7 +133,6 @@ export default function DashboardPage() {
       });
 
       const pdf = await loadingTask.promise;
-      setPageCount(pdf.numPages);
 
       let fullText = "";
 
@@ -128,14 +142,14 @@ export default function DashboardPage() {
           const textContent = await page.getTextContent();
 
           const pageText = textContent.items
-            .map((item: any) => item.str || "")
+            .map((item: PDFItem) => item.str || "")
             .filter(Boolean)
             .join(" ");
 
           if (pageText.trim()) {
             fullText += `--- Page ${pageNum} ---\n\n${pageText}\n\n`;
           }
-        } catch (pageError) {
+        } catch {
           fullText += `--- Page ${pageNum} ---\n\n[Error extracting text from this page]\n\n`;
         }
       }
@@ -163,14 +177,9 @@ export default function DashboardPage() {
       await navigator.clipboard.writeText(extractedText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } catch {
       setError("Failed to copy text to clipboard");
     }
-  };
-
-  const handleLogout = async () => {
-    await signOut();
-    router.push("/auth");
   };
 
   const clearPDF = () => {
@@ -181,7 +190,6 @@ export default function DashboardPage() {
     setPdfUrl("");
     setExtractedText("");
     setError("");
-    setPageCount(0);
     setCopied(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -190,26 +198,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600" />
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">PDF Text Extractor</h1>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            {pageCount > 0 && (
-              <Badge variant="secondary" className="hidden sm:inline-flex">
-                {pageCount} {pageCount === 1 ? "page" : "pages"}
-              </Badge>
-            )}
-            <Button onClick={handleLogout} variant="destructive" size="sm">
-              <LogOut className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
-          </div>
-        </div>
-      </header> */}
-
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Loading PDF.js Library */}
         {!pdfjsLoaded && !error && (

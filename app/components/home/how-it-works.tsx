@@ -50,7 +50,7 @@ export function HowItWorks() {
                 <div className="mt-6 sm:mt-8 text-center">
                     <Button asChild size="lg">
                         <Link href="/dashboard">
-                            Try It Now - It's Free
+                            Try It Now - Its Free
                             <ArrowRight className="w-5 h-5 ml-2" />
                         </Link>
                     </Button>
