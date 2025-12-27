@@ -1,29 +1,44 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { signOut } from "@/lib/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import {
   Upload,
   FileText,
   Copy,
   Trash2,
-  LogOut,
   Loader2,
   AlertCircle,
   Check,
   RefreshCw
 } from "lucide-react";
 
-// Declare pdfjs-dist type
+interface PDFItem {
+  str?: string;
+}
+
+interface PDFTextContent {
+  items: PDFItem[];
+}
+
 declare global {
   interface Window {
-    pdfjsLib: any;
+    pdfjsLib: {
+      GlobalWorkerOptions: {
+        workerSrc: string;
+      };
+      getDocument: (params: { data: Uint8Array; verbosity: number }) => {
+        promise: Promise<{
+          numPages: number;
+          getPage: (pageNum: number) => Promise<{
+            getTextContent: () => Promise<PDFTextContent>;
+          }>;
+        }>;
+      };
+    };
   }
 }
 
@@ -33,11 +48,9 @@ export default function DashboardPage() {
   const [extractedText, setExtractedText] = useState<string>("");
   const [isExtracting, setIsExtracting] = useState(false);
   const [error, setError] = useState<string>("");
-  const [pageCount, setPageCount] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [pdfjsLoaded, setPdfjsLoaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
 
   // Load PDF.js library from CDN
   useEffect(() => {
@@ -69,7 +82,7 @@ export default function DashboardPage() {
     return () => {
       try {
         document.body.removeChild(script);
-      } catch (e) {
+      } catch {
         // Script already removed
       }
     };
@@ -120,7 +133,6 @@ export default function DashboardPage() {
       });
 
       const pdf = await loadingTask.promise;
-      setPageCount(pdf.numPages);
 
       let fullText = "";
 
@@ -130,14 +142,14 @@ export default function DashboardPage() {
           const textContent = await page.getTextContent();
 
           const pageText = textContent.items
-            .map((item: any) => item.str || "")
+            .map((item: PDFItem) => item.str || "")
             .filter(Boolean)
             .join(" ");
 
           if (pageText.trim()) {
             fullText += `--- Page ${pageNum} ---\n\n${pageText}\n\n`;
           }
-        } catch (pageError) {
+        } catch {
           fullText += `--- Page ${pageNum} ---\n\n[Error extracting text from this page]\n\n`;
         }
       }
@@ -165,14 +177,9 @@ export default function DashboardPage() {
       await navigator.clipboard.writeText(extractedText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } catch {
       setError("Failed to copy text to clipboard");
     }
-  };
-
-  const handleLogout = async () => {
-    await signOut();
-    router.push("/auth");
   };
 
   const clearPDF = () => {
@@ -183,7 +190,6 @@ export default function DashboardPage() {
     setPdfUrl("");
     setExtractedText("");
     setError("");
-    setPageCount(0);
     setCopied(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -192,28 +198,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600" />
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">PDF Text Extractor</h1>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            {pageCount > 0 && (
-              <Badge variant="secondary" className="hidden sm:inline-flex">
-                {pageCount} {pageCount === 1 ? "page" : "pages"}
-              </Badge>
-            )}
-            <Button onClick={handleLogout} variant="destructive" size="sm">
-              <LogOut className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Loading PDF.js Library */}
         {!pdfjsLoaded && !error && (
@@ -223,7 +207,6 @@ export default function DashboardPage() {
           </Alert>
         )}
 
-        {/* Error Display */}
         {error && (
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />
@@ -241,7 +224,6 @@ export default function DashboardPage() {
           </Alert>
         )}
 
-        {/* Upload Section */}
         {!pdfFile && (
           <Card className="max-w-2xl mx-auto">
             <CardHeader className="text-center pb-4">
@@ -283,10 +265,8 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        {/* PDF Viewer and Text Extractor */}
         {pdfFile && (
           <div className="space-y-4 sm:space-y-6">
-            {/* File Info Controls */}
             <Card>
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -329,7 +309,6 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Split View with Tabs */}
             <Tabs defaultValue="split" className="w-full">
               <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
                 <TabsTrigger value="split" className="text-xs sm:text-sm">Split View</TabsTrigger>
@@ -339,7 +318,6 @@ export default function DashboardPage() {
 
               <TabsContent value="split" className="space-y-4">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                  {/* PDF Preview */}
                   <Card className="overflow-hidden">
                     <CardHeader className="bg-slate-900 text-white py-3">
                       <CardTitle className="text-base">PDF Preview</CardTitle>
@@ -357,7 +335,6 @@ export default function DashboardPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Extracted Text */}
                   <Card className="overflow-hidden">
                     <CardHeader className="bg-slate-900 text-white py-3 flex flex-row justify-between items-center">
                       <CardTitle className="text-base">Extracted Text</CardTitle>

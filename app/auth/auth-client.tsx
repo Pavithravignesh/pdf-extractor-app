@@ -83,7 +83,6 @@ export default function AuthClientPage() {
         </CardHeader>
 
         <CardContent className="space-y-4 sm:space-y-6">
-          {/* Error Display */}
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
@@ -91,7 +90,6 @@ export default function AuthClientPage() {
             </Alert>
           )}
 
-          {/* Social Authentication */}
           <div className="space-y-3">
             <Button
               onClick={() => handleSocialAuth("github")}
@@ -120,7 +118,6 @@ export default function AuthClientPage() {
             </div>
           </div>
 
-          {/* Email/Password Form */}
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {!isSignIn && (
               <div className="space-y-2">
@@ -188,7 +185,6 @@ export default function AuthClientPage() {
             </Button>
           </form>
 
-          {/* Toggle between Sign In and Sign Up */}
           <div className="text-center">
             <Button
               type="button"
