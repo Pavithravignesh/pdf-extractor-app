@@ -8,13 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Upload, 
-  FileText, 
-  Copy, 
-  Trash2, 
-  LogOut, 
-  Loader2, 
+import {
+  Upload,
+  FileText,
+  Copy,
+  Trash2,
+  LogOut,
+  Loader2,
   AlertCircle,
   Check,
   RefreshCw
